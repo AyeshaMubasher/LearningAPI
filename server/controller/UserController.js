@@ -14,7 +14,29 @@ export const getAllUsers=async(req,res)=>{
     }
 }
 
+export const checkUser=async(req,res)=>{
+    const {email,password}=req.body;
+    try{
+    const user= await UserModel.findOne({where:{email:email}});
+        if(user){
+            if(user.password==password){
+                return res.status(200).json(user)
+                }
+                return res.status(401).json({"error":"Password Incorrect!"})
+        }
+        else{
+            return res.status(404).json({"error":"user not found"})
+        }
+        
+    }
+    catch(error){
+        console.log(error)
+        return res.status(500).json({"error":"Internal server error"})
+    }
+}
+
 export const addUser=async(req,res)=>{
+    console.log(req.body);
     const {FirstName,LastName,email,password} = req.body;
     try{
         const usr= await UserModel.findOne({where:{email:email}})
@@ -23,7 +45,7 @@ export const addUser=async(req,res)=>{
             return res.status(201).json({message:"User added successfully"})
         }
         else{
-            return res.status(200).json({message:"already found"})
+            return res.status(501).json({error:"already found"})
         }
     }
     catch(error){
