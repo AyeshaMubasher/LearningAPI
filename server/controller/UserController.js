@@ -1,4 +1,5 @@
 import { UserModel } from "../Posgres/postgres.js"
+import bcrypt from 'bcrypt'
 
 export const getAllUsers=async(req,res)=>{
     try{
@@ -19,7 +20,8 @@ export const checkUser=async(req,res)=>{
     try{
     const user= await UserModel.findOne({where:{email:email}});
         if(user){
-            if(user.password==password){
+            const isMatch = await bcrypt.compare(password,user.password)
+            if(isMatch){
                 return res.status(200).json(user)
                 }
                 return res.status(401).json({"error":"Password Incorrect!"})
@@ -37,11 +39,18 @@ export const checkUser=async(req,res)=>{
 
 export const addUser=async(req,res)=>{
     console.log(req.body);
-    const {FirstName,LastName,email,password} = req.body;
+    let {FirstName,LastName,email,password} = req.body;
+
+    password = await bcrypt.hash(password, 10)
+
+    console.log(password)
+    const data={
+        FirstName,LastName,email,password
+    }
     try{
         const usr= await UserModel.findOne({where:{email:email}})
         if(usr==null){
-            await UserModel.create(req.body);
+            await UserModel.create(data);
             return res.status(201).json({message:"User added successfully"})
         }
         else{
