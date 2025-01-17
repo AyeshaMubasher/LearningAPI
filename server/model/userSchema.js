@@ -30,6 +30,14 @@ export const createUserModel=async(sequelize)=>{
                 }
               },
             unique:true
+        },
+        Address:{
+            type:DataTypes.STRING,
+            allowNull: true
+        },
+        PhoneNumber:{
+            type:DataTypes.STRING,
+            allowNull: true
         }
     })
     return User;
