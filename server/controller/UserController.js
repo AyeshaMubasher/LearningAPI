@@ -1,10 +1,10 @@
+import dotenv from 'dotenv';
+dotenv.config();
 import { UserModel } from "../Posgres/postgres.js"
 import bcrypt from 'bcrypt'
 import { response, text } from "express";
 import jwt from 'jsonwebtoken'
 import sgMail from '@sendgrid/mail';
-
-const sendGridAPIKey="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";
 
 //used in home page and edit profile page 
 export const getAllUsers=async(req,res)=>{
@@ -29,7 +29,7 @@ export const checkUser=async(req,res)=>{
         if(user){
             const isMatch = await bcrypt.compare(password,user.password)
             if(isMatch){
-                const token = jwt.sign({userId: user.id},"6764jkgkkgjk995959jkkjg446",{
+                const token = jwt.sign({userId: user.id},process.env.JWT_Secret_Key,{
                     expiresIn: "5h"
                 });
                 return res.json({token});
@@ -56,7 +56,7 @@ export const verifyToken= async(req,res,next)=>{
     try{
         const decoded = jwt.verify(
            token.split(" ")[1],
-           "6764jkgkkgjk995959jkkjg446" 
+           process.env.JWT_Secret_Key 
         );
         req.user = decoded;
         next();
@@ -86,12 +86,12 @@ export const getUserData= async(req,res)=>{
 //use in register
 export const addUser=async(req,res)=>{
     console.log(req.body);
-    let {FirstName,LastName,email,password} = req.body;
+    let {FirstName,LastName,email} = req.body;
 
-    password=((Math.floor(Math.random()*(9999-1000)+1))+1000)+"";
+    let password=((Math.floor(Math.random()*(9999-1000)+1))+1000)+"";
     console.log(password)
     //add code to automatically generate email and send to the user
-    sgMail.setApiKey(sendGridAPIKey);
+    sgMail.setApiKey(process.env.API_KEY);
     const message ={
         to: email,
         from: "ayeshaMubasher28@gmail.com",
